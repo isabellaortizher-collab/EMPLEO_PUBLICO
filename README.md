@@ -231,20 +231,162 @@ Se abre automáticamente en `http://localhost:3000`
 
 ---
 
-## 📋 Módulo 2 — Hoja de Vida *(Isabela Cabezas — por implementar)*
+## 📋 Módulo 2 — Hoja de Vida *(Isabela Cabezas)*
 
-El Módulo 2 cubre las HU-006 a HU-015 y debe construirse sobre esta misma base. Algunos puntos importantes para continuar:
+## Descripción
 
-- El sistema de autenticación ya está listo — usar `useAuth()` del `AuthContext` para obtener el usuario actual
-- Para proteger rutas nuevas usar el componente `<RutaProtegida>` ya existente
-- Los nuevos endpoints del backend deben crearse en `backend/routes/` e importarse en `server.js`
-- Los estilos globales están en `frontend/src/index.css` con variables CSS — úsalas para mantener consistencia visual
-- La conexión a MongoDB Atlas ya está configurada — solo agregar los nuevos modelos en `backend/models/`
+Este módulo implementa el sistema de gestión de hoja de vida para servidores públicos, compatible con el módulo de Hoja de Vida del **SIGEP II**, administrado por el Departamento Administrativo de la Función Pública de Colombia.
+
+La hoja de vida se crea una única vez por persona y aplica para sucesivas vinculaciones a distintas entidades. El servidor diligencia sus propios datos y el Jefe de Talento Humano (JTH) valida la información contrastándola con los soportes físicos.
 
 ---
 
-## 📝 Notas adicionales
+## Historias de Usuario implementadas
 
-- El proyecto usa **nodemon** en desarrollo, por lo que el servidor se reinicia automáticamente al guardar cambios
-- El frontend usa el **proxy** de React para redirigir las llamadas `/api` al backend en puerto 5000
-- Los archivos `node_modules/` y `.env` están en `.gitignore` y no se suben al repositorio
+| HU | Descripción |
+|----|-------------|
+| HU-006 | Registro de datos personales (nombres, apellidos, documento, fecha de nacimiento, género, contacto y dirección) |
+| HU-007 | Soporte para residencia en zona rural mediante campo de complemento o dirección especial |
+| HU-008 | Registro de formación académica (pregrado, posgrado, tarjeta profesional) con soporte PDF máx. 2 MB |
+| HU-009 | Registro de experiencia laboral pública, privada y docente con certificaciones |
+| HU-010 | Sección de Gerencia Pública habilitada condicionalmente por el JTH según el cargo |
+| HU-011 | Guardado independiente por sección sin perder información en caso de interrupciones |
+| HU-012 | Identificación visual de campos obligatorios marcados con asterisco (*) |
+| HU-013 | Adjuntar documentos de soporte en PDF o JPG con tamaño máximo de 2 MB |
+| HU-014 | Previsualización de documentos adjuntos mediante botón "Ver soporte" |
+| HU-015 | Descarga e impresión de la hoja de vida completa desde el sistema |
+
+---
+
+## Roles
+
+| Rol | Permisos en este módulo |
+|-----|------------------------|
+| Servidor Público | Diligencia y guarda su propia hoja de vida |
+| Jefe de Talento Humano | Valida secciones, habilita Gerencia Pública, levanta validaciones |
+
+---
+
+## Estructura de archivos
+
+```
+EMPLEO_PUBLICO/
+├── backend/
+│   ├── models/
+│   │   └── HojaDeVida.js          # Modelo MongoDB con sub-esquemas
+│   └── routes/
+│       └── hojaDeVida.js          # Endpoints REST del módulo
+└── frontend/
+    └── src/
+        ├── pages/
+        │   └── HojaDeVidaPage.jsx         # Página principal con navegación por secciones
+        ├── components/
+        │   └── hojaDeVida/
+        │       ├── DatosPersonalesForm.jsx
+        │       ├── FormacionAcademicaForm.jsx
+        │       ├── ExperienciaLaboralForm.jsx
+        │       ├── GerenciaPublicaForm.jsx
+        │       └── ResumenHV.jsx
+        ├── services/
+        │   └── hojaDeVidaApi.js           # Llamadas a la API del módulo
+        └── styles/
+            └── hojaDeVida.css             # Estilos del módulo
+```
+
+---
+
+## Endpoints de la API
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/hoja-de-vida/progreso` | Progreso general de secciones |
+| GET | `/api/hoja-de-vida/datos-personales` | Obtener datos personales |
+| PUT | `/api/hoja-de-vida/datos-personales` | Guardar datos personales |
+| GET | `/api/hoja-de-vida/formacion-academica` | Listar formación académica |
+| POST | `/api/hoja-de-vida/formacion-academica` | Agregar formación con soporte |
+| DELETE | `/api/hoja-de-vida/formacion-academica/:id` | Eliminar registro de formación |
+| GET | `/api/hoja-de-vida/experiencia-laboral` | Listar experiencia laboral |
+| POST | `/api/hoja-de-vida/experiencia-laboral` | Agregar experiencia con soporte |
+| DELETE | `/api/hoja-de-vida/experiencia-laboral/:id` | Eliminar registro de experiencia |
+| GET | `/api/hoja-de-vida/gerencia-publica` | Obtener gerencia pública |
+| POST | `/api/hoja-de-vida/gerencia-publica` | Agregar registro de gerencia |
+| GET | `/api/hoja-de-vida/soporte/:filename` | Previsualizar documento adjunto |
+| GET | `/api/hoja-de-vida/descargar` | Descargar hoja de vida completa |
+| PUT | `/api/hoja-de-vida/admin/habilitar-gerencia/:id` | JTH: habilitar Gerencia Pública |
+| PUT | `/api/hoja-de-vida/admin/validar/:id` | JTH: validar o desbloquear sección |
+
+Todos los endpoints requieren autenticación mediante JWT en el header `Authorization: Bearer <token>`.
+
+---
+
+## Modelo de datos
+
+La hoja de vida se almacena en MongoDB con la siguiente estructura principal:
+
+```json
+{
+  "usuario": "ObjectId",
+  "datosPersonales": {
+    "nombres": "", "apellidos": "", "tipoDocumento": "",
+    "numeroDocumento": "", "fechaNacimiento": "", "genero": "",
+    "correoElectronico": "", "celular": "", "telefono": "",
+    "tipoZona": "URBANA | RURAL", "departamento": "", "municipio": "",
+    "direccion": "", "complementoDireccion": "", "validado": false
+  },
+  "formacionAcademica": [],
+  "experienciaLaboral": [],
+  "tieneGerenciaPublica": false,
+  "gerenciaPublica": [],
+  "seccionesGuardadas": {
+    "datosPersonales": false,
+    "formacionAcademica": false,
+    "experienciaLaboral": false,
+    "gerenciaPublica": false
+  }
+}
+```
+
+---
+
+## Dependencias agregadas
+
+```bash
+# Backend
+npm install multer
+```
+
+No se agregaron dependencias nuevas en el frontend.
+
+---
+
+## Configuración
+
+### Variables de entorno (`.env`)
+No se requieren variables nuevas. El módulo usa las mismas del Módulo 1.
+
+### Archivos subidos
+Los soportes adjuntados por los usuarios se guardan en `backend/uploads/`. Esta carpeta está excluida del repositorio mediante `.gitignore`.
+
+---
+
+## Instrucciones de ejecución
+
+```bash
+# Backend
+cd backend
+npm install
+npm run dev
+
+# Frontend (en otra terminal)
+cd frontend
+npm install
+npm start
+```
+
+Acceder en: `http://localhost:3000` → iniciar sesión → clic en **Mi Hoja de Vida**.
+
+---
+
+## Universidad Autónoma de Occidente
+**Facultad de Ingeniería — Proyecto Informático**  
+SIGEP II — Sistema de Gestión del Empleo Público
