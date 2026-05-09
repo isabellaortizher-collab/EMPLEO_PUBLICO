@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 
@@ -12,7 +13,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ── Rutas ──
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/hoja-de-vida', require('./routes/hojaDeVida'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/api/health', (req, res) => {
   res.json({ estado: 'OK', sistema: 'SIGEP II', fecha: new Date() });
@@ -41,7 +45,6 @@ mongoose.connect(MONGODB_URI)
 async function seedAdminUser() {
   try {
     const Usuario = require('./models/Usuario');
-    // Borra el usuario si existe y lo recrea limpio
     await Usuario.deleteOne({ numeroIdentificacion: '00000001' });
     await Usuario.create({
       tipoDocumento: 'CEDULA_CIUDADANIA',

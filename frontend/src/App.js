@@ -9,6 +9,7 @@ import CambiarContrasenaPage from './pages/CambiarContrasenaPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
 import './index.css';
+import HojaDeVidaPage from "./pages/HojaVidaPage";
 
 function LayoutAutenticado() {
   return (
@@ -28,6 +29,7 @@ function AppRoutes() {
       <Route element={<RutaProtegida><LayoutAutenticado /></RutaProtegida>}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/cambiar-contrasena" element={<CambiarContrasenaPage />} />
+        <Route path="/hoja-de-vida" element={<HojaDeVidaPage />} />
         <Route path="/admin" element={
           <RutaProtegida roles={['JEFE_TALENTO_HUMANO', 'ADMIN']}><AdminPage /></RutaProtegida>
         } />
@@ -46,3 +48,5 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+

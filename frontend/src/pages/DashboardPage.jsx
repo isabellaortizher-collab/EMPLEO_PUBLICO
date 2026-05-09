@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const MODULOS = [
-  { id: 'hoja-vida', titulo: 'Mi Hoja de Vida', desc: 'Gestione su información personal, educación y experiencia laboral', icono: '📋', roles: ['SERVIDOR_PUBLICO', 'JEFE_TALENTO_HUMANO', 'ADMIN'], ruta: '/hoja-vida' },
+{ id: 'hoja-vida', titulo: 'Mi Hoja de Vida', desc: 'Gestione su información personal, educación y experiencia laboral', icono: '📋', roles: ['SERVIDOR_PUBLICO', 'JEFE_TALENTO_HUMANO', 'ADMIN'], ruta: '/hoja-de-vida' },
   { id: 'admin', titulo: 'Administración de Usuarios', desc: 'Cree usuarios, asigne roles e inhabilite accesos', icono: '👥', roles: ['JEFE_TALENTO_HUMANO', 'ADMIN'], ruta: '/admin' },
   { id: 'cambiar-contrasena', titulo: 'Cambiar Contraseña', desc: 'Actualice su contraseña de acceso al sistema', icono: '🔐', roles: ['SERVIDOR_PUBLICO', 'JEFE_TALENTO_HUMANO', 'ADMIN'], ruta: '/cambiar-contrasena' },
 ];
