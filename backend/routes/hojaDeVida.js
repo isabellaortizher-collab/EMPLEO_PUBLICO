@@ -123,7 +123,8 @@ router.post(
         nivel, tituloObtenido, institucion, paisInstitucion,
         fechaGrado: fechaGrado || null,
         tarjetaProfesional: tarjetaProfesional || "",
-        soporteUrl: req.file ? req.file.filename : "",
+        soporteUrl: req.file
+        ? `/api/hoja-de-vida/soporte/${req.file.filename}`: "",
       };
 
       hv.formacionAcademica.push(nueva);
@@ -188,7 +189,8 @@ router.post(
         fechaRetiro: trabajoActual === "true" ? null : fechaRetiro || null,
         trabajoActual: trabajoActual === "true",
         descripcionFunciones: descripcionFunciones || "",
-        soporteUrl: req.file ? req.file.filename : "",
+        soporteUrl: req.file
+        ? `/api/hoja-de-vida/soporte/${req.file.filename}`: "",
       };
 
       hv.experienciaLaboral.push(nueva);
@@ -253,7 +255,9 @@ router.post(
         cargo: cargo || "",
         fechaIngreso: fechaIngreso || null,
         fechaRetiro: fechaRetiro || null,
-        soporteUrl: req.file ? req.file.filename : "",
+        soporteUrl: req.file
+          ? `/api/hoja-de-vida/soporte/${req.file.filename}`
+              : "",
       };
 
       hv.gerenciaPublica.push(nueva);
@@ -268,7 +272,7 @@ router.post(
 );
 
 
-router.get("/soporte/:filename", proteger, (req, res) => {
+router.get("/soporte/:filename", (req, res) => {
   const filePath = path.join(__dirname, "../uploads", req.params.filename);
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ ok: false, mensaje: "Archivo no encontrado." });
@@ -300,7 +304,6 @@ router.get("/progreso", proteger, async (req, res) => {
 
 router.put("/admin/habilitar-gerencia/:usuarioId", proteger, async (req, res) => {
   try {
-    // Solo JTH puede hacer esto
     const rolActivo = req.usuario.roles?.some((r) => r.nombre === "JEFE_TALENTO_HUMANO" && r.activo);
     if (!rolActivo) return res.status(403).json({ ok: false, mensaje: "No autorizado." });
 
@@ -331,7 +334,6 @@ router.put("/admin/validar/:usuarioId", proteger, async (req, res) => {
     if (seccion === "datosPersonales") {
       hv.datosPersonales.validado = validar;
     } else {
-      // Para arrays, validar/desvalidar todos los items de esa sección
       hv[seccion].forEach((item) => { item.validado = validar; });
     }
     await hv.save();
