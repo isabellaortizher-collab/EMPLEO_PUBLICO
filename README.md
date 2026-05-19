@@ -105,7 +105,7 @@ empleo_publico/
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/tuUsuario/empleo_publico.git
+https://github.com/isabellaortizher-collab/EMPLEO_PUBLICO.git
 cd empleo_publico
 ```
 
